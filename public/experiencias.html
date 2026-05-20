@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Experiencias</title>
+
+<link
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+
+    <div class="container">
+
+        <a class="navbar-brand fw-bold fs-3" href="index.html">
+            MEXPLORA
+        </a>
+
+        <div class="navbar-nav mx-auto">
+
+            <a class="nav-link" href="index.html">
+                Inicio
+            </a>
+
+            <a class="nav-link" href="hoteles.html">
+                Buscar Hoteles
+            </a>
+
+            <a class="nav-link active" href="experiencias.html">
+                Experiencias
+            </a>
+
+            <a class="nav-link" href="estadisticas.html">
+                Estadísticas
+            </a>
+
+        </div>
+
+    </div>
+
+</nav>
+
+<div class="container py-5">
+
+    <div class="text-center mb-5">
+
+        <h1 class="fw-bold">
+            Experiencias Turísticas
+        </h1>
+
+        <p class="text-muted">
+            Descubre destinos y actividades populares en México
+        </p>
+
+    </div>
+
+    <div class="row mb-5 g-3 justify-content-center">
+
+        <div class="col-md-5">
+
+            <input
+                type="text"
+                id="busquedaExperiencia"
+                class="form-control form-control-lg"
+                placeholder="Buscar destino..."
+            >
+
+        </div>
+
+        <div class="col-md-3">
+
+            <select
+                id="filtroTipo"
+                class="form-select form-select-lg"
+            >
+
+                <option value="">
+                    Todos los tipos
+                </option>
+
+                <option value="Playa">
+                    Playa
+                </option>
+
+                <option value="Ciudad">
+                    Ciudad
+                </option>
+
+                <option value="Pueblo Mágico">
+                    Pueblo Mágico
+                </option>
+
+                <option value="Cultural">
+                    Cultural
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+    <div class="row g-4" id="experienciasContainer">
+
+    </div>
+
+</div>
+
+<script>
+
+const imagenes = {
+
+    "Cancún":"images/cancun.jpg",
+
+    "Ciudad de México":"images/cdmx.jpg",
+
+    "Guadalajara":"images/guadalajara.jpg",
+
+    "Oaxaca":"images/oaxaca.jpg",
+
+    "Puerto Vallarta":"images/puertovallarta.jpg",
+
+    "Los Cabos":"images/loscabos.jpg"
+
+};
+
+async function cargarExperiencias(){
+
+    const response =
+        await fetch('/api/experiencias');
+
+    const data =
+        await response.json();
+
+    console.log(data);
+
+    const container =
+        document.getElementById('experienciasContainer');
+
+    container.innerHTML = '';
+
+    const textoBusqueda =
+        document
+        .getElementById('busquedaExperiencia')
+        .value
+        .toLowerCase();
+
+    const tipoFiltro =
+        document
+        .getElementById('filtroTipo')
+        .value;
+
+    const experienciasFiltradas =
+        data.filter(exp => {
+
+            const coincideBusqueda =
+
+                exp.nombre_destino
+                .toLowerCase()
+                .includes(textoBusqueda);
+
+            const coincideTipo =
+
+                tipoFiltro === ''
+
+                ||
+
+                exp.nombre_tipo
+                .includes(tipoFiltro);
+
+            return (
+                coincideBusqueda &&
+                coincideTipo
+            );
+
+        });
+
+    experienciasFiltradas.forEach(exp => {
+
+      const imagen =
+        `images/${
+            exp.nombre_estado
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g,"")
+            .replaceAll(' ','')
+        }.jpg`;
+        container.innerHTML += `
+
+            <div class="col-md-4">
+
+                <div class="destino-card">
+
+                    <div class="image-container">
+
+                        <img src="${imagen}">
+
+                    </div>
+
+                    <div class="destino-info">
+
+                        <h4 class="fw-bold">
+                            ${exp.nombre_destino}
+                        </h4>
+
+                        <p>
+                            ${exp.nombre_tipo}
+                        </p>
+
+                        <p class="text-muted">
+                            ${exp.nombre_estado}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+document
+.getElementById('busquedaExperiencia')
+.addEventListener(
+    'input',
+    cargarExperiencias
+);
+
+document
+.getElementById('filtroTipo')
+.addEventListener(
+    'change',
+    cargarExperiencias
+);
+
+cargarExperiencias();
+
+</script>
+
+</body>
+</html>
